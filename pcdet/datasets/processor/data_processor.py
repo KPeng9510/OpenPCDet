@@ -119,16 +119,16 @@ class DataProcessor(object):
         #visibility = np.pad(visibility, ((0,2),(0,0)), 'edge')
         data_dict['vis'] = visibility
         #print(data_dict.keys())
-        dense_points = data_dict['dense_point']
+        dense_gt = data_dict['dense_gt']
         #print(dense_points[:,-1])
         #sys.exit()
         points = data_dict['points'] 
         #print(pc_range)
         #sys.exit()
         voxel_output = voxel_generator.generate(points)
-        dense_points[:,-1] = np.clip(dense_points[:,-1],0,12)
+        #dense_points[:,-1] = np.clip(dense_points[:,-1],0,12)
         #sys.exit()
-        dense_gt = dense.compute_dense_gt(dense_points, pc_range,voxel_size,13).reshape(13,500,1000)
+        #dense_gt = dense.compute_dense_gt(dense_points, pc_range,voxel_size,13).reshape(13,500,1000)
         #print(dense_gt.size())
         #sys.exit()
         #voxel_dense = voxel_generator.generate(dense_points)
