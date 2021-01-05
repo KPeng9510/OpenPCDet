@@ -27,9 +27,9 @@ class PointPillarScatter(nn.Module):
         self.num_bev_features = self.model_cfg.NUM_BEV_FEATURES
         self.nx, self.ny, self.nz = grid_size
         #self.nx = 1001
-        #self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi = nn.Conv2d(80,64,kernel_size=3,stride=1,padding=1,bias=False)
-        #self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_visi = nn.Conv2d(15,64,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
         self.relu = nn.ReLU()
         self.zp = nn.ZeroPad2d(1)
         self.softmax = nn.Softmax(dim=-1)

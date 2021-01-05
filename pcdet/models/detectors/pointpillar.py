@@ -131,7 +131,7 @@ class PointPillar(Detector3DTemplate):
             batch_dict = cur_module(batch_dict)
             if module_index == 2:
 
-                points_mean = batch_dict["points_coor"]
+                #points_mean = batch_dict["points_coor"]
                 dict_seg = []
                 dict_cls_num = []
                 label_b = batch_dict["labels_seg"]
