@@ -136,6 +136,9 @@ class DatasetTemplate(torch_data.Dataset):
         self.data_dict["dense_gt"]=dense_gt
         points = np.concatenate([points,np.zeros([points.shape[0],1])], axis=-1)
         self.data_dict["points"] = points
+        if self.training=False:
+            obser_path = '/mrtstorage/users/bieder/datasets/skitti_gridmaps_v3/08/single_shot/cartesian/observations/000000000'+str(point_path).split('/')[-1].split('.')[0]+'.png'
+            self.data_dict["observation"]= imageio.imread(obser_path)
         ret_dict = self.prepare_data(self.data_dict)
         return ret_dict
         
