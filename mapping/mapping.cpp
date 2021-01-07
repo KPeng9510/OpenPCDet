@@ -340,10 +340,10 @@ Eigen::VectorXsc _compute_visibility(const Eigen::MatrixXf & original_points,
     //
     const double & pxmin = pc_range[0];
     const double & pymin = pc_range[1];
-    const double & pzmin = pc_range[2]+1;
+    const double & pzmin = pc_range[2];
     const double & pxmax = pc_range[3];
     const double & pymax = pc_range[4];
-    const double & pzmax = pc_range[5]-4;
+    const double & pzmax = pc_range[5];
 
     //
     const int vxsize = (pxmax - pxmin) / voxel_size;
@@ -625,10 +625,10 @@ Eigen::VectorXf _compute_logodds(const Eigen::MatrixXf & original_points,
     //
     const double & pxmin = pc_range[0];
     const double & pymin = pc_range[1];
-    const double & pzmin = pc_range[2]+1;
+    const double & pzmin = pc_range[2];
     const double & pxmax = pc_range[3];
     const double & pymax = pc_range[4];
-    const double & pzmax = pc_range[5]-4;
+    const double & pzmax = pc_range[5];
 
     //
     const int vxsize = (pxmax - pxmin) / voxel_size;

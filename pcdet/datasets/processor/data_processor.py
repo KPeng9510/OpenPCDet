@@ -104,7 +104,7 @@ class DataProcessor(object):
         #np.set_printoptions(threshold=sys.maxsize)
         #visi_map = np.zeros([1001, 501,3])
         visibility = np.int64(visibility)
-        visibility = np.reshape(visibility,(15, 500,1000))[0:15, :, :]
+        visibility = np.reshape(visibility,(80, 500,1000))[0:80, :, :]
         visibility = np.transpose(visibility, (2,1,0))
         #print(visibility)
         #sys.exit()

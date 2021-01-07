@@ -131,7 +131,7 @@ class DatasetTemplate(torch_data.Dataset):
         """
         point_path = self.files_seq[index].rstrip()
         points = np.fromfile(str(point_path), dtype=np.float32, count=-1).reshape([-1, 4])[:, :4]
-        dense_path = '/mrtstorage/users/kpeng/kitti-semantics/label_image/' +str(point_path).split('/')[-2] +'/'+ str(point_path).split('/')[-1]
+        dense_path = '/mrtstorage/users/kpeng/kitti-semantics/label_image_1/' +str(point_path).split('/')[-2] +'/'+ str(point_path).split('/')[-1]
         dense_gt = np.fromfile(str(dense_path), dtype=np.float32, count=-1).reshape([-1, 5]).reshape(1,500,1000)
         self.data_dict["dense_gt"]=dense_gt
         points = np.concatenate([points,np.zeros([points.shape[0],1])], axis=-1)

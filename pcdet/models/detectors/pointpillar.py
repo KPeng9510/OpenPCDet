@@ -140,12 +140,12 @@ class PointPillar(Detector3DTemplate):
                 targets_crr = label_b.view(batch,c,h,w) #torch.cat(dict_seg,dim=0).view(batch,c,h,w)
                 spatial_features = batch_dict["spatial_features"]
                 pred = self.segmentation_head(spatial_features)
-                label = target_crr[0,:,:,:].flatten().cpu().numpy().astype(np.float32).tobytes()
-                #label = torch.argmax(pred[0].unsqueeze(0),dim=1).flatten().cpu().numpy().astype(np.float32).tobytes()
-                f=open("/mrtstorage/users/kpeng/labe.bin",'wb')
-                f.write(label)
-                f.close()
-                sys.exit()
+                #label = target_crr[0,:,:,:].flatten().cpu().numpy().astype(np.float32).tobytes()
+                #label = torch.argmax(label_b[0].unsqueeze(0),dim=1).flatten().cpu().numpy().astype(np.float32).tobytes()
+                #f=open("/mrtstorage/users/kpeng/labe.bin",'wb')
+                #f.write(label)
+                #f.close()
+                #sys.exit()
 
                 targets_crr = targets_crr.contiguous().view(batch,c,h,w)
                 
