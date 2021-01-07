@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
+import imageio
 import os
 import pickle
 import numpy as np
@@ -58,15 +59,17 @@ class DatasetTemplate(torch_data.Dataset):
         #self.files_seq.extend(recursive_glob(rootdir=self.root, suffix=".bin"))
         #print(self.files_seq)
         #self.files = functools.reduce(operator.iconcat, self.files_seq, [])
-        split = "train"
-        if split == "train":
+        #split = "train"
+        if self.split == "train":
             sequence = ["00","01","02","03","04","05","06","07","09","10"]
+            file_name = "/home/kpeng/pc14/sample.pkl"
         else:
             sequence = ["08"]
+            file_name = "/home/kpeng/pc14/sample_test.pkl"
         #file_list = []
-        #for idx, scene in enumerate(sequence):
-        #    self.files_seq.extend(recursive_glob(self.root+scene+'/', suffix=".bin"))
-        file_name = "/home/kpeng/pc14/sample.pkl"
+        for idx, scene in enumerate(sequence):
+            self.files_seq.extend(recursive_glob(self.root+scene+'/', suffix=".bin"))
+        #file_name = "/home/kpeng/pc14/sample_test.pkl"
 
         #open_file = open(file_name, "wb")
         #pickle.dump(self.files_seq, open_file)
@@ -136,7 +139,7 @@ class DatasetTemplate(torch_data.Dataset):
         self.data_dict["dense_gt"]=dense_gt
         points = np.concatenate([points,np.zeros([points.shape[0],1])], axis=-1)
         self.data_dict["points"] = points
-        if self.training=False:
+        if self.training==False:
             obser_path = '/mrtstorage/users/bieder/datasets/skitti_gridmaps_v3/08/single_shot/cartesian/observations/000000000'+str(point_path).split('/')[-1].split('.')[0]+'.png'
             self.data_dict["observation"]= imageio.imread(obser_path)
         ret_dict = self.prepare_data(self.data_dict)

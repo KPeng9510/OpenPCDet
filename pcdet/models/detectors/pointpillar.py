@@ -142,35 +142,37 @@ class PointPillar(Detector3DTemplate):
                 targets_crr = label_b.view(batch,c,h,w) #torch.cat(dict_seg,dim=0).view(batch,c,h,w)
                 spatial_features = batch_dict["spatial_features"]
                 pred = self.segmentation_head(spatial_features)
+                batch_dict["prediction"] = pred
                 #label = target_crr[0,:,:,:].flatten().cpu().numpy().astype(np.float32).tobytes()
                 #label = torch.argmax(label_b[0].unsqueeze(0),dim=1).flatten().cpu().numpy().astype(np.float32).tobytes()
                 #f=open("/mrtstorage/users/kpeng/labe.bin",'wb')
                 #f.write(label)
                 #f.close()
                 #sys.exit()
-
-                targets_crr = targets_crr.contiguous().view(batch,c,h,w)
-                #print("test")
-                nozero_mask = targets_crr != 0
-                targets_crr = torch.clamp(targets_crr[nozero_mask],1,13)
-                #ori_target = targets_crr
-                targets_crr = one_hot_1d((targets_crr-1).long(), 13).unsqueeze(0).permute(0,2,1).cuda()
-                pred = pred.permute(0,2,3,1).unsqueeze(1)[nozero_mask].squeeze().unsqueeze(0).permute(0,2,1)
-                object_list = [0,2,3]
-                #for obj in object_list:
-                #    if obj == 1:
-                #        mask_obj = ori_target == obj
-                #    else:
-                #        mask_obj = mask_obj | (targets_crr == obj)
-                weight = torch.ones_like(targets_crr)
-                #print(weight.size())
-                #sys.exit()
-                #mask_person = targets_crr == 1
-                #weight[mask_obj]==5
-                #weight[mask_person]==8
-                weight[:,[0,2,3],:]=5 # weight 5 for other dynamic object
-                weight[:,1,:]=8 # weight8 for pedestrain
-                loss_seg = F.binary_cross_entropy_with_logits(pred,targets_crr,reduction='mean',weight=weight)
+                
+                if self.training:
+                    targets_crr = targets_crr.contiguous().view(batch,c,h,w)
+                    #print("test")
+                    nozero_mask = targets_crr != 0
+                    targets_crr = torch.clamp(targets_crr[nozero_mask],1,13)
+                    #ori_target = targets_crr
+                    targets_crr = one_hot_1d((targets_crr-1).long(), 13).unsqueeze(0).permute(0,2,1).cuda()
+                    pred = pred.permute(0,2,3,1).unsqueeze(1)[nozero_mask].squeeze().unsqueeze(0).permute(0,2,1)
+                    object_list = [0,2,3]
+                    #for obj in object_list:
+                    #    if obj == 1:
+                    #        mask_obj = ori_target == obj
+                    #    else:
+                    #        mask_obj = mask_obj | (targets_crr == obj)
+                    weight = torch.ones_like(targets_crr)
+                    #print(weight.size())
+                    #sys.exit()
+                    #mask_person = targets_crr == 1
+                    #weight[mask_obj]==5
+                    #weight[mask_person]==8
+                    weight[:,[0,2,3],:]=5 # weight 5 for other dynamic object
+                    weight[:,1,:]=8 # weight8 for pedestrain
+                    loss_seg = F.binary_cross_entropy_with_logits(pred,targets_crr,reduction='mean',weight=weight)
         """
            code for geomertic consistency
         """
@@ -183,8 +185,8 @@ class PointPillar(Detector3DTemplate):
             tb_dict={}
             return ret_dict, tb_dict, disp_dict
         else:
-            pred_dicts, recall_dicts = self.post_processing(batch_dict)
-            return pred_dicts, recall_dicts
+            #pred_dicts, recall_dicts = self.post_processing(batch_dict)
+            return batch_dict
 
     def get_training_loss(self):
         disp_dict = {}
