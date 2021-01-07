@@ -73,7 +73,7 @@ class DataProcessor(object):
         ori_points = points[:, [0,1,2,4]]
         #print(points[:,-1])
         voxel_size = self.voxel_size
-        pc_range = self.point_cloud_range
+        pc_range = np.array([-50.0, -25.0, -2.0, 50.0, 25.0, 1.0])
         #print(pc_range)
         #print(self.voxel_size)
         origins = np.array([[0,0,0]], dtype=np.float32)
@@ -104,7 +104,7 @@ class DataProcessor(object):
         #np.set_printoptions(threshold=sys.maxsize)
         #visi_map = np.zeros([1001, 501,3])
         visibility = np.int64(visibility)
-        visibility = np.reshape(visibility,(80, 500,1000))[0:80, :, :]
+        visibility = np.reshape(visibility,(15, 500,1000))[0:15, :, :]
         visibility = np.transpose(visibility, (2,1,0))
         #print(visibility)
         #sys.exit()
