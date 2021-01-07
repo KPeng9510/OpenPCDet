@@ -121,8 +121,10 @@ class PointPillar(Detector3DTemplate):
     def __init__(self, model_cfg, num_class, dataset):
         super().__init__(model_cfg=model_cfg, num_class=num_class, dataset=dataset)
         self.module_list = self.build_networks()
+        #print("test")
         self.segmentation_head = UNet(64,13)
-        self.focal_loss = FocalLoss()
+        #print("test")
+        #self.focal_loss = FocalLoss()
     def forward(self, batch_dict):
         module_index = 0
         
@@ -148,7 +150,7 @@ class PointPillar(Detector3DTemplate):
                 #sys.exit()
 
                 targets_crr = targets_crr.contiguous().view(batch,c,h,w)
-                
+                #print("test")
                 nozero_mask = targets_crr != 0
                 targets_crr = torch.clamp(targets_crr[nozero_mask],1,13)
                 #ori_target = targets_crr
