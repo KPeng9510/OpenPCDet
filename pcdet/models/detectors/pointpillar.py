@@ -172,8 +172,8 @@ class PointPillar(Detector3DTemplate):
                     #mask_person = targets_crr == 1
                     #weight[mask_obj]==5
                     #weight[mask_person]==8
-                    weight[:,[0,2,3],:]=5 # weight 5 for other dynamic object
-                    weight[:,1,:]=8 # weight8 for pedestrain
+                    weight[:,[1,2,3],:]=8 # weight 5 for other dynamic object
+                    weight[:,0,:]=2 # weight8 for pedestrain
                     loss_seg = F.binary_cross_entropy_with_logits(pred,targets_crr,reduction='mean',weight=weight)
         """
            code for geomertic consistency
