@@ -2,6 +2,7 @@ from collections import defaultdict
 from pathlib import Path
 import imageio
 import os
+import torch
 import pickle
 import numpy as np
 import torch.utils.data as torch_data
@@ -135,17 +136,19 @@ class DatasetTemplate(torch_data.Dataset):
         point_path = self.files_seq[index].rstrip()
         points = np.fromfile(str(point_path), dtype=np.float32, count=-1).reshape([-1, 4])[:, :4]
         dense_path = '/mrtstorage/users/kpeng/kitti-semantics/label_image_1/' +str(point_path).split('/')[-2] +'/'+ str(point_path).split('/')[-1]
-        dense_gt = np.fromfile(str(dense_path), dtype=np.float32, count=-1).reshape([-1, 5]).reshape(1,500,1000)
-        self.data_dict["labels_seg"]=np.transpose(dense_gt,(1,2,0))
+        dense_gt = np.fromfile(str(dense_path), dtype=np.float32, count=-1).reshape([-1, 5]).reshape(500,1000,1)
+        self.data_dict["labels_seg"]=dense_gt
         points = np.concatenate([points,np.zeros([points.shape[0],1])], axis=-1)
         self.data_dict["points"] = points
         observation_path = '/mrtstorage/users/kpeng/kitti-semantics/visibi/' +str(point_path).split('/')[-2] +'/'+ str(point_path).split('/')[-1]
-        observation = np.fromfile(str(observation_path), dtype=np.float32, count=-1).reshape([-1, 5]).reshape(40,500,1000)
-        observation = np.transpose(observation,(1,2,0))
+        observation = torch.from_numpy(np.fromfile(str(observation_path), dtype=np.float32, count=-1).reshape(40,500,1000)).permute(1,2,0)
+        observation = observation.numpy()
+        #print(observation.shape)
+        print(self.training)
         self.data_dict["observation"]=observation
         if self.training==False:
             obser_path = '/mrtstorage/users/bieder/datasets/skitti_gridmaps_v3/08/single_shot/cartesian/observations/000000000'+str(point_path).split('/')[-1].split('.')[0]+'.png'
-            self.data_dict["observation"]= imageio.imread(obser_path)
+            self.data_dict["observation_eval"]= imageio.imread(obser_path)
         ret_dict = self.prepare_data(self.data_dict)
         return ret_dict
         
@@ -193,12 +196,22 @@ class DatasetTemplate(torch_data.Dataset):
             data_dict['gt_boxes'] = gt_boxes
         """
         #data_dict = self.point_feature_encoder.forward(data_dict)
+        #label = self.data_dict["observation"].flatten().astype(np.float32).tobytes()
+        #f=open("/mrtstorage/users/kpeng/labe2_new.bin",'wb')
+        #f.write(label)
+        #f.close()
+        #sys.exit()
         if self.training:
             data_dict = self.data_augmentor.forward(data_dict=data_dict)
         data_dict = self.data_processor.forward(
             data_dict=data_dict
         )
-
+        
+        label = self.data_dict["observation"][:,:,20].flatten().astype(np.float32).tobytes()
+        f=open("/mrtstorage/users/kpeng/labe_new.bin",'wb')
+        f.write(label)
+        f.close()
+        sys.exit()
         #if self.training and len(data_dict['gt_boxes']) == 0:
         #    new_index = np.random.randint(self.__len__())
         #    return self.__getitem__(new_index)
