@@ -122,7 +122,7 @@ class PointPillar(Detector3DTemplate):
         super().__init__(model_cfg=model_cfg, num_class=num_class, dataset=dataset)
         self.module_list = self.build_networks()
         #print("test")
-        self.segmentation_head = UNet(64,13)
+        self.segmentation_head = UNet(64,12)
         #print("test")
         #self.focal_loss = FocalLoss()
     def forward(self, batch_dict):
@@ -139,7 +139,8 @@ class PointPillar(Detector3DTemplate):
                 label_b = batch_dict["labels_seg"]
 
                 batch,c,h,w =label_b.size()
-                targets_crr = label_b.view(batch,c,h,w) #torch.cat(dict_seg,dim=0).view(batch,c,h,w)
+                targets_crr = label_b.view(batch,c,h,w).permute(0,3,1,2) #torch.cat(dict_seg,dim=0).view(batch,c,h,w)
+                print(targets_crr.size())
                 spatial_features = batch_dict["spatial_features"]
                 pred = self.segmentation_head(spatial_features)
                 batch_dict["prediction"] = pred
@@ -151,12 +152,12 @@ class PointPillar(Detector3DTemplate):
                 #sys.exit()
                 
                 if self.training:
-                    targets_crr = targets_crr.contiguous().view(batch,c,h,w)
+                    targets_crr = targets_crr.contiguous()
                     #print("test")
                     nozero_mask = targets_crr != 0
-                    targets_crr = torch.clamp(targets_crr[nozero_mask],1,13)
+                    targets_crr = torch.clamp(targets_crr[nozero_mask],1,12)
                     #ori_target = targets_crr
-                    targets_crr = one_hot_1d((targets_crr-1).long(), 13).unsqueeze(0).permute(0,2,1).cuda()
+                    targets_crr = one_hot_1d((targets_crr-1).long(), 12).unsqueeze(0).permute(0,2,1).cuda()
                     pred = pred.permute(0,2,3,1).unsqueeze(1)[nozero_mask].squeeze().unsqueeze(0).permute(0,2,1)
                     object_list = [0,2,3]
                     #for obj in object_list:

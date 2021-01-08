@@ -21,16 +21,16 @@ def global_rotation_voxel_feat(voxel_feat, theta, scale=1.0):
     ny, nx, c = voxel_feat.shape  # H W C
     # rot_mat = get_rotation_scale_matrix2d((int(nx / 2), int(ny / 2)), theta, scale)
     rot_mat = cv2.getRotationMatrix2D((int(nx / 2), int(ny / 2)), -theta * 180 / np.pi, scale)
-    voxel_feat = cv2.warpAffine(voxel_feat, rot_mat, (nx, ny))  # H W C
-    return voxel_feat.reshape(ny, nx, 1)
+    voxel_feat = cv2.warpAffine(voxel_feat, rot_mat, (nx, ny), flags=cv2.INTER_NEAREST)  # H W C
+    return voxel_feat.reshape(ny, nx, -1)
 
 
 def global_scale_voxel_feat(voxel_feat, scale, theta=0.0):
     ny, nx, c = voxel_feat.shape  # H W C
     # rot_mat = get_rotation_scale_matrix2d((int(nx / 2), int(ny / 2)), theta, scale)
     rot_mat = cv2.getRotationMatrix2D((int(nx / 2), int(ny / 2)), -theta * 180 / np.pi, scale)
-    voxel_feat = cv2.warpAffine(voxel_feat, rot_mat, (nx, ny))  # H W C
-    return voxel_feat.reshape(ny, nx, 1)
+    voxel_feat = cv2.warpAffine(voxel_feat, rot_mat, (nx, ny), flags=cv2.INTER_NEAREST)  # H W C
+    return voxel_feat.reshape(ny, nx, -1)
 
 
 def random_flip_along_x(gt_seg, points, observations):
@@ -97,3 +97,31 @@ def global_scaling(gt_seg, points, observatjions, scale_range):
     if observatjions is not None:
         observatjions = global_scale_voxel_feat(observatjions, noise_scale)
     return gt_seg, points, observatjions
+
+
+def global_translate_voxel_feat(voxel_feat, dw, dh):
+    ny, nx, c = voxel_feat.shape  # H W C
+    mat = np.array([[1, 0, dw], [0, 1, dh]], dtype=np.float32)
+    voxel_feat = cv2.warpAffine(voxel_feat, mat, (nx, ny), flags=cv2.INTER_NEAREST)  # H W C
+    return voxel_feat.reshape(ny, nx, -1)
+
+
+def global_translate(gt_seg, points, observations, noise_translate_std):
+    """
+    Apply global translation to gt_boxes and points.
+    """
+    if not isinstance(noise_translate_std, (list, tuple, np.ndarray)):
+        noise_translate_std = np.array([noise_translate_std, noise_translate_std, noise_translate_std])
+
+    noise_translate = np.array([np.random.normal(0, noise_translate_std[0], 1),
+                                np.random.normal(0, noise_translate_std[1], 1),
+                                np.random.normal(0, noise_translate_std[2], 1)]).T  # 1 3
+    points[:, :3] += noise_translate
+
+    dw = noise_translate[0, 0] // 0.1
+    dh = noise_translate[0, 1] // 0.1
+    gt_seg = global_translate_voxel_feat(gt_seg, dw, dh)
+    if observations is not None:
+        observations = global_translate_voxel_feat(observations, dw, dh)
+
+    return gt_seg, points, observations

@@ -70,6 +70,7 @@ class DataAugmentor(object):
 
         data_dict['labels_seg'] = gt_seg
         data_dict['points'] = points
+
         if observations is not None:
             data_dict['observations'] = observations
 
@@ -84,7 +85,27 @@ class DataAugmentor(object):
         )
         data_dict['labels_seg'] = gt_seg
         data_dict['points'] = points
+
+        if observations is not None:
+            data_dict['observations'] = observations
+
         return data_dict
+
+    def random_world_translation(self, data_dict=None, config=None):
+        if data_dict is None:
+            return partial(self.random_world_translation, config=config)
+        observations = data_dict.get('observations', None)
+        gt_seg, points, observations = augmentor_utils.global_translate(
+            data_dict['labels_seg'], data_dict['points'], observations, config['WORLD_TRANSLATE_RANGE']
+        )
+        data_dict['labels_seg'] = gt_seg
+        data_dict['points'] = points
+
+        if observations is not None:
+            data_dict['observations'] = observations
+
+        return data_dict
+
 
     def forward(self, data_dict):
         """

@@ -90,36 +90,36 @@ class DataProcessor(object):
         #print(time_stamps)
         #print(points.shape)
         #sys.exit()
-        if num_points > num_original:
-            #print("this is test sample")
-            original_points, sampled_points = ori_points[:num_original,:], ori_points[num_original:,:]
-            visibility, original_mask, sampled_mask = mapping.compute_logodds_and_masks(
-                original_points, sampled_points,origins,time_stamps,pc_range,min(voxel_size))
-            points = np.concatenate((original_points[original_mask], sampled_points[sampled_mask]))
-        else:
-            
-            visibility = mapping.compute_logodds(
-                             ori_points, origins,time_stamps,pc_range,0.1)
-        
+        #if num_points > num_original:
+        #    #print("this is test sample")
+        #    original_points, sampled_points = ori_points[:num_original,:], ori_points[num_original:,:]
+        #    visibility, original_mask, sampled_mask = mapping.compute_logodds_and_masks(
+        #        original_points, sampled_points,origins,time_stamps,pc_range,min(voxel_size))
+        #   points = np.concatenate((original_points[original_mask], sampled_points[sampled_mask]))
+        #else:
+        #    
+        #    visibility = mapping.compute_logodds(
+        #                     ori_points, origins,time_stamps,pc_range,0.1)
+       # 
         #np.set_printoptions(threshold=sys.maxsize)
         #visi_map = np.zeros([1001, 501,3])
-        visibility = np.int64(visibility)
-        visibility = np.reshape(visibility,(15, 500,1000))[0:15, :, :]
-        visibility = np.transpose(visibility, (2,1,0))
+        #visibility = np.int64(visibility)
+        #visibility = np.reshape(visibility,(15, 500,1000))[0:15, :, :]
+        #visibility = np.transpose(visibility, (2,1,0))
         #print(visibility)
         #sys.exit()
-        mask_occ = (visibility >= 1).nonzero()
+        #mask_occ = (visibility >= 1).nonzero()
         #print(mask_occ)
-        mask_free = (visibility == 0).nonzero()
-        mask_unknown = (visibility == -1).nonzero()
+        #mask_free = (visibility == 0).nonzero()
+        #mask_unknown = (visibility == -1).nonzero()
         #visi_map[np.int64(mask_free[0]),np.int64(mask_free[1]),:] = np.array([255,0,0])/255
         #visi_map[np.int64(mask_occ[0]),np.int64(mask_occ[1]), :] = np.array([0,255,0])/255
         #visi_map[mask_unknown[0], mask_unknown[1], :] = np.array([0,0,255])/255
         #print(.shape)
         #visibility = np.pad(visibility, ((0,2),(0,0)), 'edge')
-        data_dict['vis'] = visibility
+        #data_dict['vis'] = visibility
         #print(data_dict.keys())
-        dense_gt = data_dict['dense_gt']
+        #dense_gt = data_dict['dense_gt']
         #print(dense_points[:,-1])
         #sys.exit()
         points = data_dict['points'] 
@@ -143,7 +143,7 @@ class DataProcessor(object):
 
         #if not data_dict['use_lead_xyz']:
         #    voxels = voxels[..., 3:]  # remove xyz in voxels(N, 3)
-        data_dict['dense_gt'] = dense_gt
+        #data_dict['dense_gt'] = dense_gt
         #data_dict['dense_pillar_coords'] = voxel_dense['coordinates']
         data_dict['voxels'] = voxels
         data_dict['voxel_coords'] = coordinates

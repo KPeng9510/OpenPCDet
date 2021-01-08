@@ -28,7 +28,7 @@ class PointPillarScatter(nn.Module):
         self.nx, self.ny, self.nz = grid_size
         #self.nx = 1001
         #self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi = nn.Conv2d(80,64,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_visi = nn.Conv2d(40,64,kernel_size=3,stride=1,padding=1,bias=False)
         #self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
         self.relu = nn.ReLU()
         self.zp = nn.ZeroPad2d(1)
@@ -39,11 +39,11 @@ class PointPillarScatter(nn.Module):
         pillar_features, coords = batch_dict['pillar_features'], batch_dict['voxel_coords']
         #pillar_seg = batch_dict["pillar_seg_gt"]
         batch_size = coords[:, 0].max().int().item() + 1
-        dense_seg = batch_dict["pillar_dense_gt"].resize(batch_size,1,500,1000)
+        #dense_seg = batch_dict["pillar_dense_gt"].resize(batch_size,1,500,1000)
         #dense_coor = batch_dict["dense_pillar_coords"]
         #print(pillar_features.dtype)
         #sys.exit()
-        visibility = batch_dict['vis'].to(torch.float32).contiguous().permute(0,3,1,2).contiguous() # 2, 40, 512, 512
+        visibility = batch_dict['observation'].to(torch.float32).contiguous().permute(0,3,2,1).contiguous() # 2, 40, 512, 512
         #print(visibility[0,2,:100,:100])
         #sys.exit()
         #points_mean = batch_dict["points_mean"].squeeze()
@@ -105,7 +105,7 @@ class PointPillarScatter(nn.Module):
         #batch_seg_labels = batch_spatial_features[:,-4,:,:].unsqueeze(1)
         
         #zero_mask = batch_seg_labels == 0
-        batch_seg_labels = dense_seg
+        #batch_seg_labels = dense_seg
         #print(batch_spatial_dense[zero_mask])
         #sys.exit()
         """
@@ -113,7 +113,7 @@ class PointPillarScatter(nn.Module):
         """
         batch_spatial_features = batch_spatial_features.view(batch_size, (self.num_bev_features) * self.nz, self.ny, self.nx)
         #batch_seg_labels = batch_spatial_features[:,-4,:,:].unsqueeze(1)
-        batch_dict['labels_seg'] = batch_seg_labels
+        #batch_dict['labels_seg'] = batch_seg_labels
         #line = torch.zeros([2,1,512,16]).cuda()
         #for i in range(16):
         #    line[:,:,:,-1]=i
