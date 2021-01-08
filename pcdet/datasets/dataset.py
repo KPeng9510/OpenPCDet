@@ -144,7 +144,7 @@ class DatasetTemplate(torch_data.Dataset):
         observation = torch.from_numpy(np.fromfile(str(observation_path), dtype=np.float32, count=-1).reshape(40,500,1000)).permute(1,2,0)
         observation = observation.numpy()
         #print(observation.shape)
-        print(self.training)
+        #print(self.training)
         self.data_dict["observation"]=observation
         if self.training==False:
             obser_path = '/mrtstorage/users/bieder/datasets/skitti_gridmaps_v3/08/single_shot/cartesian/observations/000000000'+str(point_path).split('/')[-1].split('.')[0]+'.png'
@@ -207,11 +207,11 @@ class DatasetTemplate(torch_data.Dataset):
             data_dict=data_dict
         )
         
-        label = self.data_dict["observation"][:,:,20].flatten().astype(np.float32).tobytes()
-        f=open("/mrtstorage/users/kpeng/labe_new.bin",'wb')
-        f.write(label)
-        f.close()
-        sys.exit()
+        #label = self.data_dict["observation"][:,:,:].flatten().astype(np.float32).tobytes()
+        #f=open("/mrtstorage/users/kpeng/labe_new.bin",'wb')
+        #f.write(label)
+        #f.close()
+        #sys.exit()
         #if self.training and len(data_dict['gt_boxes']) == 0:
         #    new_index = np.random.randint(self.__len__())
         #    return self.__getitem__(new_index)

@@ -146,11 +146,11 @@ class PointPillar(Detector3DTemplate):
                 batch_dict["prediction"] = pred
                 #label = target_crr[0,:,:,:].flatten().cpu().numpy().astype(np.float32).tobytes()
                 
-                label = label_b[0].flatten().cpu().numpy().astype(np.float32).tobytes()
-                f=open("/mrtstorage/users/kpeng/labe.bin",'wb')
-                f.write(label)
-                f.close()
-                sys.exit()
+                #label = label_b[0].flatten().cpu().numpy().astype(np.float32).tobytes()
+                #f=open("/mrtstorage/users/kpeng/labe.bin",'wb')
+                #f.write(label)
+                #f.close()
+                #sys.exit()
                 
                 if self.training:
                     targets_crr = targets_crr.contiguous()
