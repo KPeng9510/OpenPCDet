@@ -105,33 +105,3 @@ class DataAugmentor(object):
             data_dict['observations'] = observations
 
         return data_dict
-
-
-    def forward(self, data_dict):
-        """
-        Args:
-            data_dict:
-                points: (N, 3 + C_in)
-                gt_boxes: optional, (N, 7) [x, y, z, dx, dy, dz, heading]
-                gt_names: optional, (N), string
-                ...
-
-        Returns:
-        """
-        for cur_augmentor in self.data_augmentor_queue:
-            data_dict = cur_augmentor(data_dict=data_dict)
-
-        # data_dict['gt_boxes'][:, 6] = common_utils.limit_period(
-        #     data_dict['gt_boxes'][:, 6], offset=0.5, period=2 * np.pi
-        # )
-        # if 'calib' in data_dict:
-        #     data_dict.pop('calib')
-        # if 'road_plane' in data_dict:
-        #     data_dict.pop('road_plane')
-        # if 'gt_boxes_mask' in data_dict:
-        #     gt_boxes_mask = data_dict['gt_boxes_mask']
-        #     data_dict['gt_boxes'] = data_dict['gt_boxes'][gt_boxes_mask]
-        #     data_dict['gt_names'] = data_dict['gt_names'][gt_boxes_mask]
-        #     data_dict.pop('gt_boxes_mask')
-        return data_dict
-

@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 from ...utils import common_utils
-
+import sys
 
 def get_rotation_scale_matrix2d(center, angle, scale):
     """
@@ -106,16 +106,17 @@ def global_translate_voxel_feat(voxel_feat, dw, dh):
     return voxel_feat.reshape(ny, nx, -1)
 
 
-def global_translate(gt_seg, points, observations, noise_translate_std):
+def global_translate(gt_seg, points, observations, noise_translate_range, noise_translate_std):
     """
     Apply global translation to gt_boxes and points.
     """
     if not isinstance(noise_translate_std, (list, tuple, np.ndarray)):
         noise_translate_std = np.array([noise_translate_std, noise_translate_std, noise_translate_std])
+        sys.exit()
 
-    noise_translate = np.array([np.random.normal(0, noise_translate_std[0], 1),
-                                np.random.normal(0, noise_translate_std[1], 1),
-                                np.random.normal(0, noise_translate_std[2], 1)]).T  # 1 3
+    noise_translate = np.array([np.clip(np.random.normal(0, noise_translate_std[0], 1), noise_translate_range[0], noise_translate_range[1]),
+                                np.clip(np.random.normal(0, noise_translate_std[1], 1),noise_translate_range[2], noise_translate_range[3]),
+                                np.clip(np.random.normal(0, noise_translate_std[2], 1),noise_translate_range[4],noise_translate_range[5])]).T  # 1 3
     points[:, :3] += noise_translate
 
     dw = noise_translate[0, 0] // 0.1
@@ -125,3 +126,4 @@ def global_translate(gt_seg, points, observations, noise_translate_std):
         observations = global_translate_voxel_feat(observations, dw, dh)
 
     return gt_seg, points, observations
+
