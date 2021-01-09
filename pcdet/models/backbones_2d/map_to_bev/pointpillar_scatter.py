@@ -38,7 +38,7 @@ class PointPillarScatter(nn.Module):
     def forward(self, batch_dict, **kwargs):
         pillar_features, coords = batch_dict['pillar_features'], batch_dict['voxel_coords']
         #pillar_seg = batch_dict["pillar_seg_gt"]
-        batch_size = coords[:, 0].max().int().item() + 1
+        batch_size = batch_dict['batch_size']
         #dense_seg = batch_dict["pillar_dense_gt"].resize(batch_size,1,500,1000)
         #dense_coor = batch_dict["dense_pillar_coords"]
         #print(pillar_features.dtype)
