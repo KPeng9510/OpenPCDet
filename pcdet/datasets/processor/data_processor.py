@@ -126,6 +126,7 @@ class DataProcessor(object):
         #print(pc_range)
         #sys.exit()
         voxel_output = voxel_generator.generate(points)
+        #sys.exit()
         #dense_points[:,-1] = np.clip(dense_points[:,-1],0,12)
         #sys.exit()
         #dense_gt = dense.compute_dense_gt(dense_points, pc_range,voxel_size,13).reshape(13,500,1000)
