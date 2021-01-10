@@ -62,7 +62,7 @@ class DataProcessor(object):
             return partial(self.transform_points_to_voxels, voxel_generator=voxel_generator, voxel_generator_2 = voxel_generator_2)
         #print(test)
         #sys.exit()
-        voxel_size = np.array([0.1,0.1,8.0])
+        #voxel_size = np.array([0.1,0.1,8.0])
         points = data_dict['points']
         #points = data_dict['points_sp']
         #indices = data_dict['indices']
@@ -70,23 +70,23 @@ class DataProcessor(object):
         """
            add code for visibility
         """
-        ori_points = points[:, [0,1,2,4]]
+        #ori_points = points[:, [0,1,2,4]]
         #print(points[:,-1])
-        voxel_size = self.voxel_size
-        pc_range = np.array([-50.0, -25.0, -2.0, 50.0, 25.0, 1.0])
+        #voxel_size = self.voxel_size
+        #pc_range = np.array([-50.0, -25.0, -2.0, 50.0, 25.0, 1.0])
         #print(pc_range)
         #print(self.voxel_size)
-        origins = np.array([[0,0,0]], dtype=np.float32)
-        num_points = points.shape[0]
-        num_original = num_points
-        time_stamps = np.array([-1000,0],dtype=np.float32)
+        #origins = np.array([[0,0,0]], dtype=np.float32)
+        #num_points = points.shape[0]
+        #num_original = num_points
+        #time_stamps = np.array([-1000,0],dtype=np.float32)
         
         #time_stamps = points[indices[:-1], -1]  # counting on the fact we do not miss points from any intermediate time_stamps
         #time_stamps = (time_stamps[:-1]+time_stamps[1:])/2
         #time_stamps = [-1000.0] + time_stamps.tolist() + [1000.0]  # add boundaries
         #time_stamps = np.array(time_stamps)
         #num_original = indices[-1]
-        indices =np.array([0],dtype=np.float32)
+        #indices =np.array([0],dtype=np.float32)
         #print(time_stamps)
         #print(points.shape)
         #sys.exit()

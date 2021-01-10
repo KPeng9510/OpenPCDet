@@ -141,8 +141,8 @@ class DatasetTemplate(torch_data.Dataset):
         points = np.concatenate([points,np.zeros([points.shape[0],1])], axis=-1)
         self.data_dict["points"] = points
         observation_path = '/mrtstorage/users/kpeng/kitti-semantics/visibi/' +str(point_path).split('/')[-2] +'/'+ str(point_path).split('/')[-1]
-        observation = torch.from_numpy(np.fromfile(str(observation_path), dtype=np.float32, count=-1).reshape(40,500,1000)).permute(1,2,0)
-        observation = observation.numpy()
+        observation = np.transpose(np.fromfile(str(observation_path), dtype=np.uint8, count=-1).reshape(40,500,1000),[1,2,0])
+        #observation = observation.numpy()
         #print(observation.shape)
         #print(self.training)
         self.data_dict["observation"]=observation
@@ -201,8 +201,8 @@ class DatasetTemplate(torch_data.Dataset):
         #f.write(label)
         #f.close()
         #sys.exit()
-        if self.training:
-            data_dict = self.data_augmentor.forward(data_dict=data_dict)
+        #if self.training:
+        #    data_dict = self.data_augmentor.forward(data_dict=data_dict)
         data_dict = self.data_processor.forward(
             data_dict=data_dict
         )
