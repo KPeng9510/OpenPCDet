@@ -32,9 +32,9 @@ def parse_config():
                         help='set extra config keys if needed')
 
     parser.add_argument('--max_waiting_mins', type=int, default=30, help='max waiting minutes')
-    parser.add_argument('--start_epoch', type=int, default=0, help='')
+    parser.add_argument('--start_epoch', type=int, default=10, help='')
     parser.add_argument('--eval_tag', type=str, default='default', help='eval tag for this experiment')
-    parser.add_argument('--eval_all', action='store_true', default=False, help='whether to evaluate all checkpoints')
+    parser.add_argument('--eval_all', action='store_true', default=True, help='whether to evaluate all checkpoints')
     parser.add_argument('--ckpt_dir', type=str, default=None, help='specify a ckpt directory to be evaluated if needed')
     parser.add_argument('--save_to_file', action='store_true', default=False, help='')
 
@@ -148,7 +148,7 @@ def main():
         assert args.batch_size % total_gpus == 0, 'Batch size should match the number of gpus'
         args.batch_size = args.batch_size // total_gpus
 
-    output_dir = Path("/mrtstorage/users/kpeng/train_nuscence/1_1_2021/kitti_odo_full_gt_test/") / 'output_test' / cfg.EXP_GROUP_PATH / cfg.TAG / args.extra_tag
+    output_dir = Path("/mrtstorage/users/kpeng/train_nuscence/11_1_2021_r/kitti_odo_unet_lightversion_height_4_sparse_with_vis_crr/")  / cfg.EXP_GROUP_PATH / cfg.TAG / args.extra_tag
     output_dir.mkdir(parents=True, exist_ok=True)
 
     eval_output_dir = output_dir / 'eval'

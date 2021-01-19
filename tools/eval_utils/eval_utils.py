@@ -116,7 +116,8 @@ def eval_one_epoch(cfg, model, dataloader, epoch_id, logger, dist_test=False, sa
             torch.set_printoptions(profile="full")
             batch_size, c, h, w = pred_dict["prediction"].size()
             dense_gt = pred_dict["labels_seg"]  # 0 to 12
-            observation = pred_dict["observations"]
+            observation = pred_dict["observation_eval"][:,:500,:1000].view(batch_size,1,h,w)
+            #frames = pred_dict["frame"]
             # no_obser_mask = observation <= 0
             # nonzero_mask = dense_gt.view(batch_size, 1, h, w) != 0
             # mask = torch.zeros_like(observation)  # b, 1,500,1000
@@ -125,21 +126,27 @@ def eval_one_epoch(cfg, model, dataloader, epoch_id, logger, dist_test=False, sa
             # anti_mask = ~(mask.bool())
             # dense_gt[anti_mask] = 0
             pred = pred_dict["prediction"][:, :12, :, :]
-            pred = torch.argmax(pred, dim=1, keepdim=True)  # 2 1 500 1000
-            no_obser_mask = observation <= 0
+            pred = torch.argmax(pred, dim=1, keepdim=True).view(batch_size,1,h,w)  # 2 1 500 1000
+            #print(observation.size())
+            no_obser_mask = (observation <= 0).view(batch_size,1,h,w)
+            #print(pred.size())
+            #print(no_obser_mask.size())
             pred[no_obser_mask] = -1
             # save pred as img
             prediction_save_path = result_dir / "eval_segmentation/"
             prediction_save_path.mkdir(parents=True, exist_ok=True)
-            # for batch_index in range(batch_size):
-            #     img_path = prediction_save_path / ('%06d.png' % int(i * batch_size + batch_index))
+            #for batch_index in range(batch_size):
+            #     img_path = prediction_save_path / ('%06d.png' % int(pred_dict["frame"][batch_index]))
             #     cls_id = pred[batch_index].cpu().numpy().astype(np.uint8)
             #     cls_id = np.transpose(cls_id, (1, 2, 0))
             #     rgb = id_to_rgb(cls_id)
             #     rgb = Image.fromarray(rgb)
             #     rgb.save(str(img_path))
+            #print("ok")
+            #sys.exit()
             no_gt_mask = dense_gt.view(batch_size, 1, h, w) == 0
             pred[no_gt_mask] = -1
+            dense_gt=dense_gt.view(batch_size, 1,h,w)
             dense_gt[no_obser_mask] = 0
             dense_gt = dense_gt - 1  # from -1 to 11
             prediction_save_path = result_dir / "eval_segmentation/"
