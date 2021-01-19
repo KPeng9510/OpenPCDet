@@ -145,7 +145,7 @@ class DatasetTemplate(torch_data.Dataset):
         #observation = observation.numpy()
         #print(observation.shape)
         #print(self.training)
-        self.data_dict["observation"]=observation
+        self.data_dict["observations"]=observation
         if self.training==False:
             obser_path = '/mrtstorage/users/bieder/datasets/skitti_gridmaps_v3/08/single_shot/cartesian/observations/000000000'+str(point_path).split('/')[-1].split('.')[0]+'.png'
             self.data_dict["observation_eval"]= imageio.imread(obser_path)

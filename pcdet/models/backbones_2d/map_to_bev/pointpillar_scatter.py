@@ -27,12 +27,28 @@ class PointPillarScatter(nn.Module):
         self.num_bev_features = self.model_cfg.NUM_BEV_FEATURES
         self.nx, self.ny, self.nz = grid_size
         #self.nx = 1001
-        self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi = nn.Conv2d(40,64,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
-        self.relu = nn.ReLU()
-        self.zp = nn.ZeroPad2d(1)
-        self.softmax = nn.Softmax(dim=-1)
+        #self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
+        #self.conv_visi = nn.Conv2d(40,64,kernel_size=3,stride=1,padding=1,bias=False)
+        #self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
+        #self.relu = nn.ReLU()
+        #self.zp = nn.ZeroPad2d(1)
+        #self.softmax = nn.Softmax(dim=-1)
+        self.conv_visi = nn.Sequential(
+            nn.Conv2d(40, 64, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(64, eps=1e-3, momentum=0.01),
+            nn.ReLU()
+        )
+
+        self.w_pillar = nn.Sequential(
+            nn.Conv2d(64, 1, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(1, eps=1e-3, momentum=0.01),
+        )
+
+        self.w_visi = nn.Sequential(
+            nn.Conv2d(64, 1, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(1, eps=1e-3, momentum=0.01),
+        )
+
         assert self.nz == 1
 
     def forward(self, batch_dict, **kwargs):
@@ -44,6 +60,12 @@ class PointPillarScatter(nn.Module):
         #print(pillar_features.dtype)
         #sys.exit()
         visibility = batch_dict['observation'].to(torch.float32).contiguous().permute(0,3,2,1).contiguous() # 2, 40, 512, 512
+        mask_free = visibility == -1
+        mask_occupancy = visibility == 1
+        mask_unkown = visibility == 0
+        visibility[mask_free]=0.4
+        visibility[mask_occupancy]=0.7
+        visibility[mask_unknown]=0.5
         #print(visibility[0,2,:100,:100])
         #sys.exit()
         #points_mean = batch_dict["points_mean"].squeeze()
@@ -125,20 +147,28 @@ class PointPillarScatter(nn.Module):
         #torch.autograd.set_detect_anomaly(True)
         batch_spatial_features = batch_spatial_features[:, :self.num_bev_features,:,:]
         #re_f = self.zp(batch_spatial_features)
-        re_f = self.conv_pillar(batch_spatial_features)
+        #re_f = self.conv_pillar(batch_spatial_features)
         #visibility = self.zp(visibility)
-        visibility = self.relu(self.conv_visi(visibility.permute(0,1,3,2)))
-        re_v = self.relu(self.conv_visi_2(visibility))
+        visibility = visibility.permute(0,1,3,2)
+        observations = self.conv_visi(visibility)
+
+        # Attentional fusion module
+        weight_pillar = self.w_pillar(batch_spatial_features)
+        weight_obser = self.w_visi(observations)
+        weight = torch.softmax(torch.cat([weight_pillar, weight_obser], dim=1), dim=1)
+        batch_spatial_features = batch_spatial_features * weight[:, 0:1, :, :] + observations * weight[:, 1:, :, :]
+
+        #re_v = self.relu(self.conv_visi_2(visibility))
         #re_v = visibility
         #re_f = batch_spatial_features
         #print(re_v.dtype)
         #print(re_f.dtype)
         #sys.exit()
-        attention = self.softmax(torch.cat([re_v,re_f],dim=1))
-        att1 = attention[:,0,:,:]
-        att2 = attention[:,1,:,:]
-        re_v = att1.unsqueeze(1).repeat(1,64,1,1).contiguous()*visibility
-        re_f = att2.unsqueeze(1).repeat(1,64,1,1).contiguous()*batch_spatial_features
+        #attention = self.softmax(torch.cat([re_v,re_f],dim=1))
+        #att1 = attention[:,0,:,:]
+        #att2 = attention[:,1,:,:]
+        #re_v = att1.unsqueeze(1).repeat(1,64,1,1).contiguous()*visibility
+        #re_f = att2.unsqueeze(1).repeat(1,64,1,1).contiguous()*batch_spatial_features
         #batch_spatial_features = re_v+re_f
         batch_dict['spatial_features'] = batch_spatial_features
         #batch_dict['one_hot']=onehot_labels
