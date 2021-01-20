@@ -59,10 +59,10 @@ class PointPillarScatter(nn.Module):
         #dense_coor = batch_dict["dense_pillar_coords"]
         #print(pillar_features.dtype)
         #sys.exit()
-        visibility = batch_dict['observation'].to(torch.float32).contiguous().permute(0,3,2,1).contiguous() # 2, 40, 512, 512
+        visibility = batch_dict['observations'].to(torch.float32).contiguous().permute(0,3,2,1).contiguous() # 2, 40, 512, 512
         mask_free = visibility == -1
         mask_occupancy = visibility == 1
-        mask_unkown = visibility == 0
+        mask_unknown = visibility == 0
         visibility[mask_free]=0.4
         visibility[mask_occupancy]=0.7
         visibility[mask_unknown]=0.5
