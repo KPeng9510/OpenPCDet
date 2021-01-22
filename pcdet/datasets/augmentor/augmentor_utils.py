@@ -114,9 +114,10 @@ def global_translate(gt_seg, points, observations, noise_translate_range, noise_
         noise_translate_std = np.array([noise_translate_std, noise_translate_std, noise_translate_std])
         sys.exit()
 
-    noise_translate = np.array([np.clip(np.random.normal(0, noise_translate_std[0], 1), noise_translate_range[0], noise_translate_range[1]),
-                                np.clip(np.random.normal(0, noise_translate_std[1], 1),noise_translate_range[2], noise_translate_range[3]),
-                                np.clip(np.random.normal(0, noise_translate_std[2], 1),noise_translate_range[4],noise_translate_range[5])]).T  # 1 3
+    noise_translate = np.array([np.random.normal(0, noise_translate_std[0], 1),
+                                np.random.normal(0, noise_translate_std[1], 1),
+                                np.random.normal(0, noise_translate_std[2], 1)]).T  # 1 3
+    noise_translate = np.clip(noise_translate, [-3.0*noise_translate_std[0], -3.0*noise_translate_std[1], -3.0*noise_translate_std[2]], [3.0*noise_translate_std[0], 3.0*noise_translate_std[1], 3.0*noise_translate_std[2]])
     points[:, :3] += noise_translate
 
     dw = noise_translate[0, 0] // 0.1
