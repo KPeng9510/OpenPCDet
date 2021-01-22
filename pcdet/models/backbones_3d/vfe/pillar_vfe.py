@@ -252,16 +252,16 @@ class PillarVFE(VFETemplate):
         #print(batch_dict["gt_names"].size())
         voxel_features, voxel_num_points, coords = batch_dict['voxels'], batch_dict['voxel_num_points'], batch_dict['voxel_coords']
         #print(voxel_features.size())
-        dense_gt = batch_dict['dense_pillar'][:,:,-1]
+        #dense_gt = batch_dict['dense_pillar'][:,:,-1]
         #print(dense_gt)
         #sys.exit()
-        coor = batch_dict['dense_pillar_coords']
+        #coor = batch_dict['dense_pillar_coords']
         """
         merge sem gt
         """
         
         #mask_zero = voxel_features[:,:,-2] == 0
-        seg_gt = voxel_features[:,:,5]
+        #seg_gt = voxel_features[:,:,5]
         #seg_get[mask_zero] == dense[:,:,-2][mask_zero]
         """
         end
@@ -287,20 +287,20 @@ class PillarVFE(VFETemplate):
         encode for segmentation gt for each pillar
 
         """
-        zero_mask = dense_gt == 0
-        length = dense_gt[zero_mask].size()[0]
-        dense_gt_min = torch.min(dense_gt, dim=1,keepdim=True)[0]
-        noise = torch.linspace(-20,-length-20-1,length)
-        dense_gt[zero_mask] = noise.cuda()
-        dense_gt_after = torch.mode(dense_gt.squeeze(),dim=-1,keepdim=True)[0]
-        torch.set_printoptions(profile="full")
-        dense_gt_max = torch.max(dense_gt.squeeze(),dim=-1,keepdim=True)[0]
-        mask_max = dense_gt_max <0
-        dense_gt_max[mask_max]=0
+        #zero_mask = dense_gt == 0
+        #length = dense_gt[zero_mask].size()[0]
+        #dense_gt_min = torch.min(dense_gt, dim=1,keepdim=True)[0]
+        #noise = torch.linspace(-20,-length-20-1,length)
+        #dense_gt[zero_mask] = noise.cuda()
+        #dense_gt_after = torch.mode(dense_gt.squeeze(),dim=-1,keepdim=True)[0]
+        #torch.set_printoptions(profile="full")
+        #dense_gt_max = torch.max(dense_gt.squeeze(),dim=-1,keepdim=True)[0]
+        #mask_max = dense_gt_max <0
+        #dense_gt_max[mask_max]=0
 
-        mask = dense_gt_after < dense_gt_min
-        dense_gt_after[mask] = dense_gt_max[mask]
-        batch_dict["pillar_dense_gt"] = dense_gt_after
+        #mask = dense_gt_after < dense_gt_min
+        #dense_gt_after[mask] = dense_gt_max[mask]
+        #batch_dict["pillar_dense_gt"] = dense_gt_after
         """
         encode end for segmentation gt for each pillar
 
@@ -310,20 +310,20 @@ class PillarVFE(VFETemplate):
         encode for dense segmentation gt for each pillar
 
         """
-        zero_mask = seg_gt == 0
-        length = seg_gt[zero_mask].size()[0]
-        seg_gt_min = torch.min(seg_gt, dim=1,keepdim=True)[0]
-        noise = torch.linspace(-20,-length-20-1,length)
-        seg_gt[zero_mask] = noise.cuda()
-        seg_gt_after = torch.mode(seg_gt.squeeze(),dim=-1,keepdim=True)[0]
-        torch.set_printoptions(profile="full")
-        seg_gt_max = torch.max(seg_gt.squeeze(),dim=-1,keepdim=True)[0]
-        mask_max = seg_gt_max <0
-        seg_gt_max[mask_max]=0
+        #zero_mask = seg_gt == 0
+        #length = seg_gt[zero_mask].size()[0]
+        #seg_gt_min = torch.min(seg_gt, dim=1,keepdim=True)[0]
+        #noise = torch.linspace(-20,-length-20-1,length)
+        #seg_gt[zero_mask] = noise.cuda()
+        #seg_gt_after = torch.mode(seg_gt.squeeze(),dim=-1,keepdim=True)[0]
+        #torch.set_printoptions(profile="full")
+        #seg_gt_max = torch.max(seg_gt.squeeze(),dim=-1,keepdim=True)[0]
+        #mask_max = seg_gt_max <0
+        #seg_gt_max[mask_max]=0
 
-        mask = seg_gt_after < seg_gt_min
-        seg_gt_after[mask] = seg_gt_max[mask]
-        batch_dict["pillar_seg_gt"] = seg_gt_after
+        #mask = seg_gt_after < seg_gt_min
+        #seg_gt_after[mask] = seg_gt_max[mask]
+        #batch_dict["pillar_seg_gt"] = seg_gt_after
         #print(seg_gt_after)
         #sys.exit()
         """

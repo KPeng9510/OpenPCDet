@@ -54,12 +54,12 @@ class DataProcessor(object):
                 max_num_points=config.MAX_POINTS_PER_VOXEL,
                 max_voxels=config.MAX_NUMBER_OF_VOXELS[self.mode]
             )
-            voxel_generator_2 = VoxelGenerator(
-                voxel_size=config.VOXEL_SIZE,
-                point_cloud_range=self.point_cloud_range,
-                max_num_points=config.MAX_POINTS_PER_VOXEL,
-                max_voxels=60000
-            )
+            #voxel_generator_2 = VoxelGenerator(
+            #    voxel_size=config.VOXEL_SIZE,
+            #    point_cloud_range=self.point_cloud_range,
+            #    max_num_points=config.MAX_POINTS_PER_VOXEL,
+            #    max_voxels=60000
+            #)
             grid_size = (self.point_cloud_range[3:6] - self.point_cloud_range[0:3]) / np.array(config.VOXEL_SIZE)
             self.grid_size = np.round(grid_size).astype(np.int64)
             self.voxel_size = config.VOXEL_SIZE
@@ -123,7 +123,7 @@ class DataProcessor(object):
         points = data_dict['points'] 
         #print(points.shape)
         voxel_output = voxel_generator.generate(points)
-        voxel_dense = voxel_generator.generate(dense_points)
+        #voxel_dense = voxel_generator.generate(dense_points)
         #print(voxel_dense[...,-1])
         #print(voxel_output['voxels'].shape)
         #sys.exit()
@@ -135,8 +135,8 @@ class DataProcessor(object):
 
         if not data_dict['use_lead_xyz']:
             voxels = voxels[..., 3:]  # remove xyz in voxels(N, 3)
-        data_dict['dense_pillar'] = voxel_dense['voxels']
-        data_dict['dense_pillar_coords'] = voxel_dense['coordinates']
+        #data_dict['dense_pillar'] = voxel_dense['voxels']
+        #data_dict['dense_pillar_coords'] = voxel_dense['coordinates']
         data_dict['voxels'] = voxels
         data_dict['voxel_coords'] = coordinates
         data_dict['voxel_num_points'] = num_points

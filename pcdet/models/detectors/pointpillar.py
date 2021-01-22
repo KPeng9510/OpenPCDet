@@ -36,7 +36,7 @@ class PointPillar(Detector3DTemplate):
         super().__init__(model_cfg=model_cfg, num_class=num_class, dataset=dataset)
         self.module_list = self.build_networks()
         #self.segmentation_head = FCNMaskHead()
-        self.segmentation_head = UNet(64,15)
+        self.segmentation_head = UNet(64,17)
     def forward(self, batch_dict):
         module_index = 0
         #print(batch_dict.keys())
@@ -50,7 +50,7 @@ class PointPillar(Detector3DTemplate):
             #points_mean = batch_dict['pointsmean']
             #batch_size,h,w = points_mean.size()
             #print(batch_dict["gt_boxes"][0,:,-1])
-            if module_index == 4:
+            if module_index == 2:
                 """
                   encode bbox
                 """
@@ -59,11 +59,12 @@ class PointPillar(Detector3DTemplate):
                 points_mean = batch_dict["points_coor"]
                 #print(points_mean.size())
                 gt_boxes = batch_dict["gt_boxes"]
+                batch_size = data_dict["batch_size"]
                 #batch,c,h,w = points_mean.size()
                 c,h,w=3,512,512
                 dict_seg = []
                 dict_cls_num = []
-                label_b = batch_dict["labels_seg"]
+                label_b = batch_dict["dense_point"].view(batch_size,1,h,w)
                 batch=label_b.size()[0]
                 
                 for i in range(gt_boxes.size()[0]):
@@ -171,13 +172,14 @@ class PointPillar(Detector3DTemplate):
                 #im = Image.fromarray(dict_seg[0].view([512,512,1]).cpu().numpy()*10)
                 #im.save("/mrtstorage/users/kpeng/target.jpg")
                 #print(dict_seg[0])
-                targets_crr = torch.cat(dict_seg,dim=0).view(batch,1,512,512)[:,:,128:384,128:384]
+                targets_crr = torch.cat(dict_seg,dim=0).view(batch_size,1,512,512)
                 #print(targets_crr[0])
                 #sys.exit()
                 #print(batch_dict.keys())
                 #print(batch_dict["spatial_features_2d"].size())
                 #print(batch_dict["spatial_features"].size())
-                spatial_features = batch_dict["spatial_features"][:,:,128:384,128:384]
+                spatial_features = batch_dict["spatial_features"]
+                batch_dict["spatial_features"] = 
                 pred = self.segmentation_head(spatial_features)
                 
                 #print(pred.size())
@@ -194,12 +196,12 @@ class PointPillar(Detector3DTemplate):
                 #tar = torch.argmax(batch_dict['one_hot'],dim=1)
                 #pred = torch.argmax(pred_seg, dim=1)
                 #targets = (targets.bool() | targets_crr.bool()).to(torch.float32)
-                target = targets_crr.contiguous().view(batch,1,256,256)
+                target = targets_crr.contiguous().view(batch_size,1,512,512)
                 
                 #target = torch.argmax(targets, dim=1) #from 0 to 15
                 nozero_mask = target != 0
                 #print(target[nozero_mask])
-                target = one_hot_1d((target[nozero_mask]-1).long(), 15).unsqueeze(0).permute(0,2,1).cuda()
+                target = one_hot_1d((target[nozero_mask]-1).long(), 17).unsqueeze(0).permute(0,2,1).cuda()
                 #print(target[:,-100:].size())
                 #pred = torch.argmax(pred_seg, dim=1).unsqueeze(1)
                 #print(target[nozero_mask])
