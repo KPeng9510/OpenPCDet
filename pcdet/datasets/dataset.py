@@ -68,8 +68,8 @@ class DatasetTemplate(torch_data.Dataset):
             sequence = ["08"]
             file_name = "/home/kpeng/pc14/sample_test.pkl"
         #file_list = []
-        for idx, scene in enumerate(sequence):
-            self.files_seq.extend(recursive_glob(self.root+scene+'/', suffix=".bin"))
+        #for idx, scene in enumerate(sequence):
+        #    self.files_seq.extend(recursive_glob(self.root+scene+'/', suffix=".bin"))
         #file_name = "/home/kpeng/pc14/sample_test.pkl"
 
         #open_file = open(file_name, "wb")
