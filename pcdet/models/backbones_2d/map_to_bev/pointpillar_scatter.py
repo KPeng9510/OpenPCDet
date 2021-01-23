@@ -43,23 +43,23 @@ class PointPillarScatter(nn.Module):
         #print(pillar_features.dtype)
         #sys.exit()
         visibility = batch_dict['vis'].to(torch.float32).contiguous().permute(0,3,1,2).contiguous() # 2, 40, 512, 512
-        visi_min= min(visibility)
-        visi_max = max(visibility)
+        visi_min= torch.min(visibility)
+        visi_max = torch.max(visibility)
         min_mask = visibility==visi_min
         max_mask = visibility==visi_max
-        unknown_mask = (visibility!=visi_min)&&(visibility!=visi_max)
+        unknown_mask = (visibility!=visi_min)&(visibility!=visi_max)
         visibility[min_mask]=0.4
         visibility[unknown_mask]=0.5
         visibility[max_mask]=0.7
         #print(visibility[0,2,:100,:100])
         #sys.exit()
         points_mean = batch_dict["points_mean"].squeeze()
-        pillar_features = torch.cat([pillar_features, pillar_seg,points_mean],dim=-1)
+        pillar_features = torch.cat([pillar_features,points_mean],dim=-1)
         batch_spatial_features = []
         batch_size = coords[:, 0].max().int().item() + 1
         for batch_idx in range(batch_size):
             spatial_feature = torch.zeros(
-                68,
+                67,
                 self.nz * self.nx * self.ny,
                 dtype=pillar_features.dtype,
                 device=pillar_features.device)
@@ -108,7 +108,7 @@ class PointPillarScatter(nn.Module):
         """
            merge
         """
-        batch_spatial_features = batch_spatial_features.contiguous().view(batch_size, (self.num_bev_features+4) * self.nz, self.ny, self.nx)
+        batch_spatial_features = batch_spatial_features.contiguous().view(batch_size, (self.num_bev_features+3) * self.nz, self.ny, self.nx)
         #batch_seg_labels = batch_spatial_features[:,-4,:,:].unsqueeze(1)
         
         #zero_mask = batch_seg_labels == 0
@@ -127,7 +127,7 @@ class PointPillarScatter(nn.Module):
         #batch_seg_labels = torch.cat([batch_seg_labels, line], dim=-1)
         #onehot_labels = one_hot(batch_seg_labels.to(torch.int64),16)
         #onehot_labels = onehot_labels[:,:,:,:512]
-        batch_pointsmean = batch_spatial_features[:,64:,:,:]
+        batch_pointsmean = batch_spatial_features[:,63:,:,:]
         batch_dict['pointsmean'] = batch_pointsmean
         #torch.autograd.set_detect_anomaly(True)
         batch_spatial_features = batch_spatial_features[:, :self.num_bev_features,:,:]

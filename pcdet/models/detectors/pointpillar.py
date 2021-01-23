@@ -2,6 +2,8 @@ from .detector3d_template import Detector3DTemplate
 from .unet.unet import UNet
 from .segmentation_head import FCNMaskHead
 import sys
+import torch.nn as nn
+
 from .erfnet import Net
 import os
 import torch.nn.functional as F
@@ -36,7 +38,11 @@ class PointPillar(Detector3DTemplate):
         super().__init__(model_cfg=model_cfg, num_class=num_class, dataset=dataset)
         self.module_list = self.build_networks()
         #self.segmentation_head = FCNMaskHead()
-        self.segmentation_head = UNet(64,17)
+        self.segmentation_head = UNet(64,18)
+        self.att = nn.Sequential(
+                   nn.Conv2d(18,1,kernel_size=3,stride=1,padding=1,bias=False),
+                   nn.Sigmoid()
+                   )
     def forward(self, batch_dict):
         module_index = 0
         #print(batch_dict.keys())
@@ -59,7 +65,7 @@ class PointPillar(Detector3DTemplate):
                 points_mean = batch_dict["points_coor"]
                 #print(points_mean.size())
                 gt_boxes = batch_dict["gt_boxes"]
-                batch_size = data_dict["batch_size"]
+                batch_size = batch_dict["batch_size"]
                 #batch,c,h,w = points_mean.size()
                 c,h,w=3,512,512
                 dict_seg = []
@@ -179,9 +185,9 @@ class PointPillar(Detector3DTemplate):
                 #print(batch_dict["spatial_features_2d"].size())
                 #print(batch_dict["spatial_features"].size())
                 spatial_features = batch_dict["spatial_features"]
-                batch_dict["spatial_features"] = 
-                pred = self.segmentation_head(spatial_features)
                 
+                pred = self.segmentation_head(spatial_features)
+                batch_dict["spatial_features"]=self.att(pred).repeat(1,64,1,1)*spatial_features
                 #print(pred.size())
                 #sys.exit()
                 #print(targets_crr[0])
@@ -201,7 +207,7 @@ class PointPillar(Detector3DTemplate):
                 #target = torch.argmax(targets, dim=1) #from 0 to 15
                 nozero_mask = target != 0
                 #print(target[nozero_mask])
-                target = one_hot_1d((target[nozero_mask]-1).long(), 17).unsqueeze(0).permute(0,2,1).cuda()
+                target = one_hot_1d((target[nozero_mask]-1).long(), 18).unsqueeze(0).permute(0,2,1).cuda()
                 #print(target[:,-100:].size())
                 #pred = torch.argmax(pred_seg, dim=1).unsqueeze(1)
                 #print(target[nozero_mask])
