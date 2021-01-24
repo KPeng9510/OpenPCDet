@@ -213,10 +213,10 @@ class PillarVFE(VFETemplate):
             )
         self.pfn_layers = nn.ModuleList(pfn_layers)
         self.relu = nn.ReLU()
-        self.lstm_attention = lstm_attention(num_point_features, num_point_features)
-        self.graph_attention=Graph_attention(num_point_features, 4)
+        #self.lstm_attention = lstm_attention(num_point_features, num_point_features)
+        #self.graph_attention=Graph_attention(num_point_features, 4)
         #self.graph_attention_2=Graph_attention(num_input_features,4)
-        self.pointsmean_attention = pointsmean_attention(num_point_features, 100)
+        #self.pointsmean_attention = pointsmean_attention(num_point_features, 100)
         #self.pointsmean_attention_2 = pointsmean_attention(num_input_features, 100)
         #self.feastconv = FeaStConv(20, num_input_features-1, 3, True, 1)
         self.FC1=nn.Sequential(
@@ -375,25 +375,25 @@ class PillarVFE(VFETemplate):
             batch_features = features[batch_mask, :]
             #batch_spatial_features.append(spatial_feature)
             batch_points_mean = points_mean[batch_mask,:]
-            lstm_attention = self.lstm_attention(batch_features,batch_points_mean)
+            #lstm_attention = self.lstm_attention(batch_features,batch_points_mean)
             
-            batch_features = lstm_attention*batch_features
-            features_ori = batch_features
-            batch_features = self.graph_attention(batch_features)
+            #batch_features = lstm_attention*batch_features
+            #features_ori = batch_features
+            #batch_features = self.graph_attention(batch_features)
             
-            voxel_attention1 = self.pointsmean_attention(batch_points_mean, batch_features)
-            batch_features = voxel_attention1 * batch_features
-            out1 = torch.cat([batch_features, features_ori],dim=-1)
+            #voxel_attention1 = self.pointsmean_attention(batch_points_mean, batch_features)
+            #batch_features = voxel_attention1 * batch_features
+            #out1 = torch.cat([batch_features, features_ori],dim=-1)
             #print(out1.size())
             #point_gcn_feature = self.gcn(inputPC=features).cuda()
-            out1 = self.FC1(out1)
+            #out1 = self.FC1(out1)
             #features = self.graph_attention(features, num_voxels)
             #features = self.graph_attention_2(out1)
             #voxel_attention2 = self.pointsmean_attention_2(points_mean, features)
             #features = voxel_attention2 * features
             #out2 = out1 + features
-            out1 = self.FC2(out1)
-            container[batch_mask,:] = out1
+            #out1 = self.FC2(out1)
+            #container[batch_mask,:] = out1
             # Forward pass through PFNLayers
             #final_result.append(features)
             #len1,len2 = final_result[0].size()[0], final_result[1].size()[0]
@@ -401,7 +401,7 @@ class PillarVFE(VFETemplate):
         """
            dense gt
         """
-        features = container
+        #features = container
         for pfn in self.pfn_layers:
             features = pfn(features)
         features = features.squeeze()
