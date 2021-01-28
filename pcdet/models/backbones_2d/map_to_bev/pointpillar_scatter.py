@@ -53,6 +53,7 @@ class PointPillarScatter(nn.Module):
         visibility[max_mask]=0.7
         #print(visibility[0,2,:100,:100])
         #sys.exit()
+        del visi_min,visi_max,min_mask, max_mask
         points_mean = batch_dict["points_mean"].squeeze()
         pillar_features = torch.cat([pillar_features,points_mean],dim=-1)
         batch_spatial_features = []
@@ -136,8 +137,8 @@ class PointPillarScatter(nn.Module):
         #visibility = self.zp(visibility)
         visibility = self.relu(self.conv_visi(visibility))
         #re_v = self.relu(self.conv_visi_2(visibility))
-        re_v = visibility
-        re_f = batch_spatial_features
+        #re_v = visibility
+        #re_f = batch_spatial_features
         #print(re_v.dtype)
         #print(re_f.dtype)
         #sys.exit()
@@ -146,7 +147,7 @@ class PointPillarScatter(nn.Module):
         #att2 = attention[:,1,:,:]
         #re_v = att1.unsqueeze(1).repeat(1,64,1,1).contiguous()*re_v
         #re_f = att2.unsqueeze(1).repeat(1,64,1,1).contiguous()*re_f
-        batch_spatial_features = re_v+re_f
+        batch_spatial_features = batch_spatial_features+visibility
         batch_dict['spatial_features'] = batch_spatial_features
         #batch_dict['one_hot']=onehot_labels
         #print('vis' in batch_dict.keys())
