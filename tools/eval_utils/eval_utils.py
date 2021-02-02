@@ -148,7 +148,7 @@ def eval_one_epoch(cfg, model, dataloader, epoch_id, logger, dist_test=False, sa
     miou = ((sum(iou)) / (len(iou)))
 
     print("*******************************************************")
-    for j, class_index in enumerate(class_name):
+    for j, class_index in enumerate(class_list):
         #print(j)
         print('iou_%s: %f' % (class_index, iou[j]))
         #ret_dict['iou_%s' % class_index] = iou[j]
