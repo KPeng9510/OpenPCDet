@@ -187,7 +187,8 @@ class PointPillar(Detector3DTemplate):
                 spatial_features = batch_dict["spatial_features"]
                 
                 pred = self.segmentation_head(spatial_features)
-                batch_dict["spatial_features"]=self.att(pred).repeat(1,64,1,1)*spatial_features
+                att = self.att(pred)
+                batch_dict["spatial_features"]=att.repeat(1,64,1,1)*spatial_features
                 #print(pred.size())
                 #sys.exit()
                 #print(targets_crr[0])
@@ -203,7 +204,9 @@ class PointPillar(Detector3DTemplate):
                 #pred = torch.argmax(pred_seg, dim=1)
                 #targets = (targets.bool() | targets_crr.bool()).to(torch.float32)
                 target = targets_crr.contiguous().view(batch_size,1,512,512)
-                
+                batch_dict["labels_seg"]=target
+                batch_dict["attention"]=att
+                batch_dict["prediction"]=torch.argmax(pred, dim=1,keepdim=True)
                 #target = torch.argmax(targets, dim=1) #from 0 to 15
                 nozero_mask = target != 0
                 #print(target[nozero_mask])
@@ -248,7 +251,7 @@ class PointPillar(Detector3DTemplate):
             return ret_dict, tb_dict, disp_dict
         else:
             pred_dicts, recall_dicts = self.post_processing(batch_dict)
-            return pred_dicts, recall_dicts
+            return pred_dicts, recall_dicts, batch_dict
 
     def get_training_loss(self):
         disp_dict = {}
