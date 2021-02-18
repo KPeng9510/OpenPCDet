@@ -1,4 +1,6 @@
+
 import copy
+import sys
 import pickle
 from pathlib import Path
 
@@ -8,7 +10,7 @@ from tqdm import tqdm
 from ...ops.roiaware_pool3d import roiaware_pool3d_utils
 from ...utils import common_utils
 from ..dataset import DatasetTemplate
-
+from mapping import mapping
 
 class NuScenesDataset(DatasetTemplate):
     def __init__(self, dataset_cfg, class_names, training=True, root_path=None, logger=None):
@@ -26,7 +28,7 @@ class NuScenesDataset(DatasetTemplate):
         nuscenes_infos = []
 
         for info_path in self.dataset_cfg.INFO_PATH[mode]:
-            info_path = self.root_path / info_path
+            info_path =  Path('/mrtstorage/users/kpeng/openpcdet/s/v1.0-trainval')/ info_path
             if not info_path.exists():
                 continue
             with open(info_path, 'rb') as f:
@@ -79,8 +81,19 @@ class NuScenesDataset(DatasetTemplate):
             return points[mask]
 
         lidar_path = self.root_path / sweep_info['lidar_path']
-        points_sweep = np.fromfile(str(lidar_path), dtype=np.float32, count=-1).reshape([-1, 5])[:, :4]
+        #print(lidar_path)
+        dense_path = self.root_path/dense/(sweep_info['lidar_path'].split('/')[2])
+        
+        points_sweep = np.fromfile(str(lidar_path), dtype=np.float32, count=-1).reshape([-1, 6])[:, :6]
+        #print(points_sweep.shape)
+        #sys.exit()
         points_sweep = remove_ego_points(points_sweep).T
+        numpy.set_printoptions(threshold=sys.maxsize)
+
+        #print(points_sweep[:,5])
+        #print(2)
+        #print(sweep_info)
+        #sys.exit()
         if sweep_info['transform_matrix'] is not None:
             num_points = points_sweep.shape[1]
             points_sweep[:3, :] = sweep_info['transform_matrix'].dot(
@@ -88,16 +101,30 @@ class NuScenesDataset(DatasetTemplate):
 
         cur_times = sweep_info['time_lag'] * np.ones((1, points_sweep.shape[1]))
         return points_sweep.T, cur_times.T
-
+    """
     def get_lidar_with_sweeps(self, index, max_sweeps=1):
         info = self.infos[index]
         lidar_path = self.root_path / info['lidar_path']
-        points = np.fromfile(str(lidar_path), dtype=np.float32, count=-1).reshape([-1, 5])[:, :4]
-
+        dense_path = self.root_path/'dense'/(info['lidar_path'].split('/')[2])
+        #print(dense_path)
+        #sys.exit()
+        dense_point = np.fromfile(str(dense_path), dtype=np.float32, count=-1).reshape([-1,6])[:,:6]
+        np.set_printoptions(threshold=np.inf)
+        #print(dense_point[:,-1])
+        #sys.exit()
+        points = np.fromfile(str(lidar_path), dtype=np.float32, count=-1).reshape([-1, 6])[:, :6]
+        #points = np.concatenate((points[:,:4],np.expand_dims(points[:,5],axis=-1)),axis=-1)
+        #np.set_printoptions(threshold=np.inf)
+        #print((points[:,5]!=0) & (points[:,5]!=11))
+        #print(points[:,-1])
+        #sys.exit()
+        #semantic_labels=points[:,5]
+        #points = points[:,:]
         sweep_points_list = [points]
         sweep_times_list = [np.zeros((points.shape[0], 1))]
-
+        #print(2)
         for k in np.random.choice(len(info['sweeps']), max_sweeps - 1, replace=False):
+            #print(k)
             points_sweep, times_sweep = self.get_sweep(info['sweeps'][k])
             sweep_points_list.append(points_sweep)
             sweep_times_list.append(times_sweep)
@@ -106,7 +133,61 @@ class NuScenesDataset(DatasetTemplate):
         times = np.concatenate(sweep_times_list, axis=0).astype(points.dtype)
 
         points = np.concatenate((points, times), axis=1)
-        return points
+        times = np.zeros((dense_point.shape[0], 1))
+        dense_point = np.concatenate((dense_point, times), axis=1)
+        #print(points[:,5])
+        #sys.exit()
+        return points, dense_point 
+    """
+
+    def get_lidar_with_sweeps(self, index, max_sweeps=1):
+        info = self.infos[index]
+        lidar_path = self.root_path / info['lidar_path']
+        points = np.fromfile(str(lidar_path), dtype=np.float32, count=-1).reshape([-1, 6])[:, :6]
+        dense_path = self.root_path/'dense_nusc'/(info['lidar_path'].split('/')[2])
+        #print(dense_path)
+        #sys.exit()
+        dense_point = np.fromfile(str(dense_path), dtype=np.float32, count=-1).reshape(512,512)
+
+        #points = np.concatenate((points[:,:4],np.expand_dims(points[:,5],axis=-1)),axis=-1)
+        #np.set_printoptions(threshold=np.inf)
+        #print((points[:,5]!=0) & (points[:,5]!=11))
+        #sys.exit()
+        #semantic_labels=points[:,5]
+        #points = points[:,:]
+        sweep_points_list = [points]
+        sweep_times_list = [np.zeros((points.shape[0], 1))]
+        #print(2)
+        sweep_points_list_sp = [points[:,:4]]
+        sweep_times_list_sp = [np.zeros((points.shape[0], 1))]
+        sweep_origin_list = [[[0.0,0.0,0.0]]]
+        #max_sweeps=10
+        #print(info['sweeps'])
+        for k in np.random.choice(len(info['sweeps']), max_sweeps - 1, replace=False):
+            #print(k)
+            points_sweep, times_sweep,sweep_origins = self.get_sweep(info['sweeps'][k])
+            sweep_points_list_sp.append(points_sweep)
+            sweep_times_list_sp.append(times_sweep)
+            
+            sweep_origin_list.append([sweep_origins[:3]])
+        #sys.exit()
+        #print(sweep_origin_list)
+        points = np.concatenate(sweep_points_list, axis=0)
+        times = np.concatenate(sweep_times_list,-1).astype(points.dtype)
+        #dense_point = np.concatenate((dense_point, times), axis=1)
+
+        origins = np.concatenate(sweep_origin_list, axis=0)
+        #print(origins)
+        #sys.exit()
+        indices = np.cumsum([0] + [len(pts) for pts in sweep_points_list_sp]).astype(int)
+        
+        points_sp = np.concatenate(sweep_points_list_sp, axis=0)
+        times_sp = np.concatenate(sweep_times_list_sp, axis=0).astype(points.dtype)
+        points = np.concatenate((points, times), axis=1)
+        points_sp = np.concatenate((points_sp, times_sp), axis=1)
+        #print(points[:,5])
+        #sys.exit()
+        return points, points_sp,origins,indices, dense_point
 
     def __len__(self):
         if self._merge_all_iters_to_one_epoch:
@@ -119,10 +200,14 @@ class NuScenesDataset(DatasetTemplate):
             index = index % len(self.infos)
 
         info = copy.deepcopy(self.infos[index])
-        points = self.get_lidar_with_sweeps(index, max_sweeps=self.dataset_cfg.MAX_SWEEPS)
+        points,points_sp, origins, indices, dense_point = self.get_lidar_with_sweeps(index, max_sweeps=self.dataset_cfg.MAX_SWEEPS)
 
         input_dict = {
             'points': points,
+            'dense_point': dense_point,
+            'indices': indices,
+            'points_sp': points_sp,
+            'origins' : origins,
             'frame_id': Path(info['lidar_path']).stem,
             'metadata': {'token': info['token']}
         }
@@ -137,17 +222,20 @@ class NuScenesDataset(DatasetTemplate):
                 'gt_names': info['gt_names'] if mask is None else info['gt_names'][mask],
                 'gt_boxes': info['gt_boxes'] if mask is None else info['gt_boxes'][mask]
             })
-
+        
+        #print(input_dict['gt_names'])
+        #print(input_dict['gt_boxes'].shape)
         data_dict = self.prepare_data(data_dict=input_dict)
-
+        data_dict['dense_point'] = dense_point
         if self.dataset_cfg.get('SET_NAN_VELOCITY_TO_ZEROS', False):
             gt_boxes = data_dict['gt_boxes']
             gt_boxes[np.isnan(gt_boxes)] = 0
             data_dict['gt_boxes'] = gt_boxes
-
+            
         if not self.dataset_cfg.PRED_VELOCITY and 'gt_boxes' in data_dict:
             data_dict['gt_boxes'] = data_dict['gt_boxes'][:, [0, 1, 2, 3, 4, 5, 6, -1]]
-
+        #print(data_dict.keys())
+        #sys.exit()
         return data_dict
 
     @staticmethod
@@ -254,35 +342,47 @@ class NuScenesDataset(DatasetTemplate):
     def create_groundtruth_database(self, used_classes=None, max_sweeps=10):
         import torch
 
-        database_save_path = self.root_path / f'gt_database_{max_sweeps}sweeps_withvelo'
-        db_info_save_path = self.root_path / f'nuscenes_dbinfos_{max_sweeps}sweeps_withvelo.pkl'
+        database_save_path = Path('/mrtstorage/users/kpeng/openpcdet/s/v1.0-trainval/' + f'gt_database_{max_sweeps}sweeps_withvelo')
+        db_info_save_path = Path('/mrtstorage/users/kpeng/openpcdet/s/v1.0-trainval/'+ f'nuscenes_dbinfos_{max_sweeps}sweeps_withvelo.pkl')
 
         database_save_path.mkdir(parents=True, exist_ok=True)
+        r_path = Path('/home/kpeng/pc14/OpenPCDet/data_new/v1.0-trainval/')
         all_db_infos = {}
-
+        s_path = Path('/mrtstorage/users/kpeng/openpcdet/s/')
         for idx in tqdm(range(len(self.infos))):
             sample_idx = idx
             info = self.infos[idx]
-            points = self.get_lidar_with_sweeps(idx, max_sweeps=max_sweeps)
+            
+            points = self.get_lidar_with_sweeps(idx, max_sweeps=max_sweeps)[0]
             gt_boxes = info['gt_boxes']
             gt_names = info['gt_names']
 
+            
+            
+            
             box_idxs_of_pts = roiaware_pool3d_utils.points_in_boxes_gpu(
                 torch.from_numpy(points[:, 0:3]).unsqueeze(dim=0).float().cuda(),
                 torch.from_numpy(gt_boxes[:, 0:7]).unsqueeze(dim=0).float().cuda()
             ).long().squeeze(dim=0).cpu().numpy()
-
+            #np.set_printoptions(threshold=np.inf)
+            #print(box_idxs_of_pts)
+            #sys.exit()
             for i in range(gt_boxes.shape[0]):
                 filename = '%s_%s_%d.bin' % (sample_idx, gt_names[i], i)
                 filepath = database_save_path / filename
                 gt_points = points[box_idxs_of_pts == i]
-
+                
                 gt_points[:, :3] -= gt_boxes[i, :3]
-                with open(filepath, 'w') as f:
+                #print(gt_points.dtype)
+                #print(gt_points.shape)
+                #print(filename)
+                #sys.exit()
+                gt_points = gt_points.flatten()
+                with open(filepath, 'wb') as f:
                     gt_points.tofile(f)
 
                 if (used_classes is None) or gt_names[i] in used_classes:
-                    db_path = str(filepath.relative_to(self.root_path))  # gt_database/xxxxx.bin
+                    db_path = str(filepath.relative_to(s_path))  # gt_database/xxxxx.bin
                     db_info = {'name': gt_names[i], 'path': db_path, 'image_idx': sample_idx, 'gt_idx': i,
                                'box3d_lidar': gt_boxes[i], 'num_points_in_gt': gt_points.shape[0]}
                     if gt_names[i] in all_db_infos:
@@ -295,13 +395,22 @@ class NuScenesDataset(DatasetTemplate):
         with open(db_info_save_path, 'wb') as f:
             pickle.dump(all_db_infos, f)
 
+class NuScenesDatasetD6(NuScenesDataset):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        if len(self.infos) > 28000:
+            self.infos = list(
+                sorted(self.infos, key=lambda e: e["timestamp"]))
+            self.infos = self.infos[::8]
+
+
 
 def create_nuscenes_info(version, data_path, save_path, max_sweeps=10):
     from nuscenes.nuscenes import NuScenes
     from nuscenes.utils import splits
     from . import nuscenes_utils
     data_path = data_path / version
-    save_path = save_path / version
+    save_path = save_path +'/'+ version
 
     assert version in ['v1.0-trainval', 'v1.0-test', 'v1.0-mini']
     if version == 'v1.0-trainval':
@@ -333,13 +442,13 @@ def create_nuscenes_info(version, data_path, save_path, max_sweeps=10):
 
     if version == 'v1.0-test':
         print('test sample: %d' % len(train_nusc_infos))
-        with open(save_path / f'nuscenes_infos_{max_sweeps}sweeps_test.pkl', 'wb') as f:
+        with open(save_path + '/'+ 'nuscenes_infos_{max_sweeps}sweeps_test.pkl', 'wb') as f:
             pickle.dump(train_nusc_infos, f)
     else:
         print('train sample: %d, val sample: %d' % (len(train_nusc_infos), len(val_nusc_infos)))
-        with open(save_path / f'nuscenes_infos_{max_sweeps}sweeps_train.pkl', 'wb') as f:
+        with open(save_path +'/'+ f'nuscenes_infos_{max_sweeps}sweeps_train.pkl', 'wb') as f:
             pickle.dump(train_nusc_infos, f)
-        with open(save_path / f'nuscenes_infos_{max_sweeps}sweeps_val.pkl', 'wb') as f:
+        with open(save_path + '/' + f'nuscenes_infos_{max_sweeps}sweeps_val.pkl', 'wb') as f:
             pickle.dump(val_nusc_infos, f)
 
 
@@ -359,16 +468,17 @@ if __name__ == '__main__':
         dataset_cfg = EasyDict(yaml.load(open(args.cfg_file)))
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         dataset_cfg.VERSION = args.version
+        """
         create_nuscenes_info(
             version=dataset_cfg.VERSION,
-            data_path=ROOT_DIR / 'data' / 'nuscenes',
-            save_path=ROOT_DIR / 'data' / 'nuscenes',
+            data_path=ROOT_DIR / 'data_seg',
+            save_path='/home/kpeng/pc14/OpenPCDet/' + 'data_seg/',
             max_sweeps=dataset_cfg.MAX_SWEEPS,
-        )
+        )"""
 
         nuscenes_dataset = NuScenesDataset(
             dataset_cfg=dataset_cfg, class_names=None,
-            root_path=ROOT_DIR / 'data' / 'nuscenes',
+            root_path=Path('/mrtstorage/users/kpeng/openpcdet/s/'),
             logger=common_utils.create_logger(), training=True
         )
         nuscenes_dataset.create_groundtruth_database(max_sweeps=dataset_cfg.MAX_SWEEPS)
