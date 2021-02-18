@@ -7,7 +7,7 @@ Dependencies are the same with these two repos.
 Semantic attention is generated through our work to weight the input of PointPillars 2D Backbone.
 UNet from https://github.com/milesial/Pytorch-UNet.git is utilized to achieve semantic segmentation prediction.
 In our work we use a modified one which removes first block.
-It is also the official code release of [`[PointRCNN]`](https://arxiv.org/abs/1812.04244), [`[Part-A^2 net]`](https://arxiv.org/abs/1907.03670) and [`[PV-RCNN]`](https://arxiv.org/abs/1912.13192). 
+
 # Nuscenes dataset peprocessing
   The preprocessings for Nuscenes Semantic dataset are listed in folder nuscenes. Training for this work utilizes 3D point cloud painted with its semantic label.
   First, change the annotation of semantic segmentation into 19 classes with unlabeled.
