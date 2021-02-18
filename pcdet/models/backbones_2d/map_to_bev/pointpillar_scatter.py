@@ -27,9 +27,9 @@ class PointPillarScatter(nn.Module):
         self.model_cfg = model_cfg
         self.num_bev_features = self.model_cfg.NUM_BEV_FEATURES
         self.nx, self.ny, self.nz = grid_size
-        self.conv_pillar = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi = nn.Conv2d(40,64,kernel_size=3,stride=1,padding=1,bias=False)
-        self.conv_visi_2 = nn.Conv2d(64,1,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_pillar = nn.Conv2d(self.num_bev_features,1,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_visi = nn.Conv2d(40,self.num_bev_features,kernel_size=3,stride=1,padding=1,bias=False)
+        self.conv_visi_2 = nn.Conv2d(self.num_bev_features,1,kernel_size=3,stride=1,padding=1,bias=False)
         self.relu = nn.ReLU()
         self.zp = nn.ZeroPad2d(1)
         self.softmax = nn.Softmax(dim=-1)
@@ -37,22 +37,24 @@ class PointPillarScatter(nn.Module):
 
     def forward(self, batch_dict, **kwargs):
         pillar_features, coords = batch_dict['pillar_features'], batch_dict['voxel_coords']
-        #pillar_seg = batch_dict["pillar_seg_gt"]
-        #dense_seg = batch_dict["pillar_dense_gt"]
-        #dense_coor = batch_dict["dense_pillar_coords"]
-        #print(pillar_features.dtype)
-        #sys.exit()
+        
         visibility = batch_dict['vis'].to(torch.float32).contiguous().permute(0,3,1,2).contiguous() # 2, 40, 512, 512
         visi_min= torch.min(visibility)
         visi_max = torch.max(visibility)
         min_mask = visibility==visi_min
         max_mask = visibility==visi_max
         unknown_mask = (visibility!=visi_min)&(visibility!=visi_max)
+        """
+            visibility feature encoding
+        """
         visibility[min_mask]=0.4
         visibility[unknown_mask]=0.5
         visibility[max_mask]=0.7
-        #print(visibility[0,2,:100,:100])
-        #sys.exit()
+        """
+            encoding end
+
+        """
+        
         points_mean = batch_dict["points_mean"].squeeze()
         pillar_features = torch.cat([pillar_features,points_mean],dim=-1)
         batch_spatial_features = []

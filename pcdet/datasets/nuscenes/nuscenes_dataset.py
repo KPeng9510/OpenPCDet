@@ -352,14 +352,13 @@ class NuScenesDataset(DatasetTemplate):
         for idx in tqdm(range(len(self.infos))):
             sample_idx = idx
             info = self.infos[idx]
-            #print(1)
+            
             points = self.get_lidar_with_sweeps(idx, max_sweeps=max_sweeps)[0]
             gt_boxes = info['gt_boxes']
             gt_names = info['gt_names']
 
             
-            #print(gt_boxes.shape)
-            #sys.exit()
+            
             
             box_idxs_of_pts = roiaware_pool3d_utils.points_in_boxes_gpu(
                 torch.from_numpy(points[:, 0:3]).unsqueeze(dim=0).float().cuda(),
