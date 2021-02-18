@@ -1,12 +1,17 @@
 <img src="docs/open_mmlab.png" align="right" width="30%">
 
-# OpenPCDet
+# PointPillars with dense semantic segmentation detection on Nuscenes
 
-`OpenPCDet` is a clear, simple, self-contained open source project for LiDAR-based 3D object detection. 
-
+ This work is based on OpenPCDet repo(https://github.com/open-mmlab/OpenPCDet.git) and wysiwyg visibility repo (https://github.com/peiyunh/wysiwyg.git)
+Dependencies are the same with these two repos.
 It is also the official code release of [`[PointRCNN]`](https://arxiv.org/abs/1812.04244), [`[Part-A^2 net]`](https://arxiv.org/abs/1907.03670) and [`[PV-RCNN]`](https://arxiv.org/abs/1912.13192). 
-
-
+# Nuscenes dataset peprocessing
+  The preprocessings for Nuscenes Semantic dataset are listed in folder nuscenes. Training for this work utilizes 3D point cloud painted with its semantic label.
+  First, change the annotation of semantic segmentation into 19 classes with unlabeled.
+  Second, concatenate labels on point cloud.
+  Third, generate BEV ground truth. Since bounding box projection is demonstrated in our work, data augmentation is still valid.
+  Forth, training.
+# OpenPCDet Introduction
 ## Overview
 - [Changelog](#changelog)
 - [Design Pattern](#openpcdet-design-pattern)
