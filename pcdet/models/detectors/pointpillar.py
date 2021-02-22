@@ -39,7 +39,7 @@ class PointPillar(Detector3DTemplate):
         self.module_list = self.build_networks()
         #self.segmentation_head = FCNMaskHead()
         self.model_cfg = model_cfg
-        self.num_bev_features = self.model_cfg.NUM_BEV_FEATURES
+        self.num_bev_features = self.model_cfg.MAP_TO_BEV.NUM_BEV_FEATURES
 
         self.semantic_class = 18 # change it to the version you want
         self.segmentation_head = UNet(self.num_bev_features,self.semantic_class)
@@ -49,7 +49,7 @@ class PointPillar(Detector3DTemplate):
                    )
     def forward(self, batch_dict):
         module_index = 0
-        
+        h,w=512, 512
         
         for cur_module in self.module_list:
             module_index += 1
@@ -63,7 +63,7 @@ class PointPillar(Detector3DTemplate):
                 points_mean = batch_dict["points_coor"]
                 gt_boxes = batch_dict["gt_boxes"]
                 batch_size = batch_dict["batch_size"]
-                batch,c,h,w = points_mean.size()
+                #batch = points_mean.size()
                 dict_seg = []
                 dict_cls_num = []
                 label_b = batch_dict["dense_point"].view(batch_size,1,h,w)
