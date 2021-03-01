@@ -11,7 +11,7 @@ It is also the official code release of [`[PointRCNN]`](https://arxiv.org/abs/18
   Second, concatenate labels on point cloud.
   Third, generate BEV ground truth. Since bounding box projection is demonstrated in our work, data augmentation is still valid.
   Forth, training.
-  !image[https://github.com/KPeng9510/OpenPCDet/blob/det_seg/imgs/pillarized.png]
+  ![image](https://github.com/KPeng9510/OpenPCDet/blob/det_seg/imgs/pillarized.png)
 # OpenPCDet Introduction
 ## Overview
 - [Changelog](#changelog)
