@@ -14,6 +14,7 @@ In our work we use a modified one which removes first block.
   Second, concatenate labels on point cloud.
   Third, generate BEV ground truth. Since bounding box projection is demonstrated in our work, data augmentation is still valid.
   Forth, training.
+  ![image](https://github.com/KPeng9510/OpenPCDet/blob/det_seg/imgs/pillarized.png)
 # OpenPCDet Introduction
 ## Overview
 - [Changelog](#changelog)

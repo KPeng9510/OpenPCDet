@@ -39,7 +39,7 @@ DATA_AUGMENTOR:
               'barrier:2', 'motorcycle:6', 'bicycle:6', 'pedestrian:2', 'traffic_cone:2'
           ]
 
-          NUM_POINT_FEATURES: 7
+          NUM_POINT_FEATURES: 7 #please change it to 5 if you don't use painted point cloud
           DATABASE_WITH_FAKELIDAR: False
           REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
           LIMIT_WHOLE_SCENE: True
